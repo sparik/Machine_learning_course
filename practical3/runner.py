@@ -39,19 +39,18 @@ def evaluate_performance():
     n, d = X.shape
     folds = 10
 
-    np.random.seed(13)
-
     dtree_accuracies = []
     forest_accuracies = []
     log_accuracies = []
 
     for trial in range(10):
+        np.random.seed(13)
         idx = np.arange(n)
         np.random.shuffle(idx)
         X = X[idx]
         Y = Y[idx]
 
-        print("trial", trial)
+        print("trial", trial + 1)
 
         trainsz = int((folds - 1) / (folds) * len(X))
 
