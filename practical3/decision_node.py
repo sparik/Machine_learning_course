@@ -1,10 +1,8 @@
-#!/usr/bin/python
-import numpy as np
-from collections import defaultdict
+#!/usr/bin/python3
 
 """
-YOU MUST!!!
-Read all the lines of the code provided to you and understand what it does!
+this module contains the DecisionNode class
+and a function for building a decision tree
 """
 
 
@@ -16,8 +14,8 @@ class DecisionNode(object):
     node = DecisionNode()  is a simple usecase for the class
     you can also initialize the class like this:
     node = DecisionNode(column = 3, value = "Car")
-    In python, when you initialize a class like this, its __init__ method is called 
-    with the given arguments. __init__() creates a new object of the class type, and initializes its 
+    In python, when you initialize a class like this, its __init__ method is called
+    with the given arguments. __init__() creates a new object of the class type, and initializes its
     instance attributes/variables.
     In python the first argument of any method in a class is 'self'
     Self points to the object which it is called from and corresponds to 'this' from Java
@@ -39,12 +37,12 @@ class DecisionNode(object):
         self.current_results = current_results
         self.is_leaf = is_leaf
         self.result = result
-        mx = -1
-        for value in current_results.keys():
-            cnt = current_results[value]
-            if cnt > mx:
-                mx = cnt
-                self.result = value
+        max_cnt = -1
+        for val in current_results.keys():
+            cnt = current_results[val]
+            if cnt > max_cnt:
+                max_cnt = cnt
+                self.result = val
 
 
 def dict_of_values(data):
@@ -52,29 +50,29 @@ def dict_of_values(data):
     param data: a 2D Python list representing the data. Last column of data is Y.
     return: returns a python dictionary showing how many times each value appears in Y
 
-    for example 
+    for example
     data = [[1,'yes'],[1,'no'],[1,'yes'],[1,'yes']]
     dict_of_values(data)
     should return {'yes' : 3, 'no' :1}
     """
     results = {}
     for row in data:
-        r = row[len(row) - 1]
-        if r in results:
-            results[r] += 1
+        res = row[len(row) - 1]
+        if res in results:
+            results[res] += 1
         else:
-            results[r] = 1
+            results[res] = 1
     return results
 
 
 def divide_data(data, feature, value):
     """
     this function dakes the data and divides it in two parts by a line. A line
-    is defined by the feature we are considering (feature_column) and the target 
+    is defined by the feature we are considering (feature_column) and the target
     value. The function returns a tuple (data1, data2) which are the desired parts of the data.
     For int or float types of the value, data1 have all the data with values >= feature_val
     in the corresponding column and data2 should have rest.
-    For string types, data1 should have all data with values == feature val and data2 should 
+    For string types, data1 should have all data with values == feature val and data2 should
     have the rest.
 
     param data: a 2D Python list representing the data. Last column of data is Y.
@@ -82,7 +80,7 @@ def divide_data(data, feature, value):
     param feature_val: can be int, float, or string
     return: a tuple of two 2D python lists
     """
-    if type(value) == int or type(value) == float:
+    if isinstance(value, (int, float)):
         true_data = [row for row in data if row[feature] > value]
         false_data = [row for row in data if row[feature] <= value]
     else:
@@ -93,11 +91,11 @@ def divide_data(data, feature, value):
 def gini_impurity(data):
 
     """
-    Given two 2D lists of compute their gini_impurity index. 
+    Given two 2D lists of compute their gini_impurity index.
     Remember that last column of the data lists is the Y
     Lets assume y1 is y of data1 and y2 is y of data2.
     gini_impurity shows how diverse the values in y1 and y2 are.
-    gini impurity is given by 
+    gini impurity is given by
 
     N1*sum(p_k1 * (1-p_k1)) + N2*sum(p_k2 * (1-p_k2))
 
@@ -108,24 +106,22 @@ def gini_impurity(data):
 
     param data1: A 2D python list
     param data2: A 2D python list
-    return: a number - gini_impurity 
+    return: a number - gini_impurity
     """
 
-    N = len(data)
-
-    if N == 0:
+    if not data:
         return 0
 
     value_counts = dict_of_values(data)
 
-    s = 0.0
+    gini = 0.0
     for value in value_counts:
-        pk = value_counts[value] / N
-        s += pk * (1.0 - pk)
+        percentage_of_value = value_counts[value] / len(data)
+        gini += percentage_of_value * (1.0 - percentage_of_value)
 
-    s *= N
+    gini *= len(data)
 
-    return s
+    return gini
 
 
 def build_tree(data, current_depth=0, max_depth=1e10):
@@ -135,14 +131,15 @@ def build_tree(data, current_depth=0, max_depth=1e10):
     1: find the best feature and value of the feature to divide the data into
     two parts
     2: divide data into two parts with best feature, say data1 and data2
-        recursively call build_tree on data1 and data2. this should give as two 
-        trees say t1 and t2. Then the resulting tree should be 
-        DecisionNode(...... true_branch=t1, false_branch=t2) 
+        recursively call build_tree on data1 and data2. this should give as two
+        trees say t1 and t2. Then the resulting tree should be
+        DecisionNode(...... true_branch=t1, false_branch=t2)
 
 
-    In case all the points in the data have same Y we should not split any more, and return that node
+    In case all the points in the data have same Y we should not split any more,
+    and return that node
     For this function we will give you some of the code so its not too hard for you ;)
-    
+
     param data: param data: A 2D python list
     param current_depth: an integer. This is used if we want to limit the numbr of layers in the
         tree
@@ -150,19 +147,16 @@ def build_tree(data, current_depth=0, max_depth=1e10):
     return: an object of class DecisionNode
 
     """
-    if len(data) == 0:
+    if not data:
         return DecisionNode(is_leaf=True)
 
-    if(current_depth == max_depth):
+    if current_depth == max_depth:
         return DecisionNode(current_results=dict_of_values(data), is_leaf=True)
 
-    if(len(dict_of_values(data)) == 1):
+    if len(dict_of_values(data)) == 1:
         return DecisionNode(current_results=dict_of_values(data), is_leaf=True)
 
-    #This calculates gini number for the data before dividing 
-    self_gini = gini_impurity(data)
-
-    #Below are the attributes of the best division that you need to find. 
+    #Below are the attributes of the best division that you need to find.
     #You need to update these when you find a division which is better
     best_gini = 1e10
     best_column = None
@@ -171,22 +165,22 @@ def build_tree(data, current_depth=0, max_depth=1e10):
     best_split = None
 
     #You need to find the best feature to divide the data
-    #For each feature and each possible value of the feature compute the 
+    #For each feature and each possible value of the feature compute the
     # gini number for that division. You need to find the feature that minimizes
     # gini number. Remember that last column of data is Y
-    # Think how you can use the divide_data and gini_impurity functions you wrote 
+    # Think how you can use the divide_data and gini_impurity functions you wrote
     # above
 
     for feature in range(len(data[0]) - 1):
-        values = [data[i][feature] for i in range(len(data))]
-        unique_values = set(values)
+        unique_values = [data[i][feature] for i in range(len(data))]
+        unique_values = set(unique_values)
         unique_values = list(unique_values)
         # I think it's already sorted but just in case
         unique_values = sorted(unique_values)
 
         for value in unique_values:
             (false_data, true_data) = divide_data(data, feature, value)
-            if len(true_data) == 0 or len(false_data) == 0:
+            if not true_data or not false_data:
                 continue
             cur_impurity = gini_impurity(false_data) + gini_impurity(true_data)
             if cur_impurity < best_gini:
@@ -196,18 +190,23 @@ def build_tree(data, current_depth=0, max_depth=1e10):
                 best_split = (false_data, true_data)
 
     #recursively call build tree, construct the correct return argument and return
-    t1 = build_tree(best_split[0], current_depth + 1, max_depth)
-    t2 = build_tree(best_split[1], current_depth + 1, max_depth)
+    false_tree = build_tree(best_split[0], current_depth + 1, max_depth)
+    true_tree = build_tree(best_split[1], current_depth + 1, max_depth)
 
     return DecisionNode(column=best_column,
-                 value=best_value,
-                 false_branch=t1,
-                 true_branch=t2,
-                 current_results=dict_of_values(data))
-        
+                        value=best_value,
+                        false_branch=false_tree,
+                        true_branch=true_tree,
+                        current_results=dict_of_values(data))
+
 
 
 def print_tree(tree, indent=''):
+    """
+    :param tree: the root of decision tree, an instance of DecisionNode class
+    :param indent: string to print before the tree, for indentation
+    """
+
     # Is this a leaf node?
     if tree.is_leaf:
         print(str(tree.current_results))
@@ -224,6 +223,9 @@ def print_tree(tree, indent=''):
 
 
 def main():
+    """
+    test implementation
+    """
     data = [['slashdot', 'USA', 'yes', 18, 'None'],
             ['google', 'France', 'yes', 23, 'Premium'],
             ['reddit', 'USA', 'yes', 24, 'Basic'],

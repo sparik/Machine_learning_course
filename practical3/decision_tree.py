@@ -1,8 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-from dtOmitted import DecisionNode
-from dtOmitted import build_tree
-import numpy as np
+"""
+this module contains the DecisionTree class
+"""
+
+from decision_node import build_tree
 
 class DecisionTree(object):
     """
@@ -13,6 +15,7 @@ class DecisionTree(object):
 
     def __init__(self, max_tree_depth):
         self.max_depth = max_tree_depth
+        self.root = None
 
     def fit(self, X, Y):
         """
@@ -23,10 +26,10 @@ class DecisionTree(object):
             X = X.tolist()
         if not isinstance(Y, list):
             Y = Y.tolist()
-            
+
         data = [X[i][:] + [Y[i]] for i in range(len(X))]
         self.root = build_tree(data, max_depth=self.max_depth)
-                
+
 
     def predict(self, X):
         """
@@ -39,24 +42,29 @@ class DecisionTree(object):
         return [self.predict_one(self.root, row) for row in X]
 
     def predict_one(self, node, x):
-        if node.is_leaf == False:
+        """
+        predicts the label recursively for just one piece of data
+        :param node: current node in the decision tree, instance of DecisionNode
+        :param x: the object to classify, list
+        """
+        if not node.is_leaf:
             xval = x[node.column]
             val = node.value
-            if type(val) == int or type(val) == float:
+            if isinstance(val, (int, float)):
                 if xval > val:
                     return self.predict_one(node.true_branch, x)
-                else:
-                    return self.predict_one(node.false_branch, x)
+                return self.predict_one(node.false_branch, x)
             else:
                 if xval == val:
                     return self.predict_one(node.true_branch, x)
-                else:
-                    return self.predict_one(node.false_branch, x)
-        else:
-            return node.result
+                return self.predict_one(node.false_branch, x)
+        return node.result
 
 
 def main():
+    """
+    test implementation
+    """
     data = [['slashdot', 'USA', 'yes', 18, 'None'],
             ['google', 'France', 'yes', 23, 'Premium'],
             ['reddit', 'USA', 'yes', 24, 'Basic'],
@@ -81,10 +89,8 @@ def main():
     tree.fit(X, Y)
     predictedY = tree.predict(X)
 
-    for i in range(len(Y)):
-        assert Y[i] == predictedY[i]
-    #tree = build_tree(data)
-    #print_tree(tree)
+    for i, item in enumerate(predictedY):
+        assert item == Y[i]
 
 if __name__ == '__main__':
     main()

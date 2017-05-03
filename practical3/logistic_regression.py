@@ -1,5 +1,8 @@
+"""
+this module contains implementation of logistic regression
+"""
+
 import numpy as np
-import math
 
 def normalize_data(X, l):
     Xs = np.copy(X)
@@ -41,13 +44,13 @@ def normalized_gradient(X, Y, beta, l):
     """
     m = len(X)
     n = len(beta)
-    beta=beta.reshape(n, 1)
-    grad=np.empty([n], dtype=float)
+    beta = beta.reshape(n, 1)
+    grad = np.empty([n], dtype=float)
 
     for i in range(n):
         grad[i] = 2 * l[i] * beta[i]
         for j in range(m):
-            grad[i] -= X[j,i] * Y[j] * (1 - sigmoid(Y[j] * np.dot(beta.T, X[j,:])))
+            grad[i] -= X[j, i] * Y[j] * (1 - sigmoid(Y[j] * np.dot(beta.T, X[j, :])))
 
     return grad / len(X)
 
@@ -69,7 +72,7 @@ def logistic_regression(X, Y, epsilon=1e-4, l=1, step_size=1e-3, max_steps=500):
     (Xs, l, fstd, fmean) = normalize_data(X1, l)
 
     beta = np.zeros(Xs.shape[1])
-    for s in range(max_steps):
+    for _ in range(max_steps):
         gradient = normalized_gradient(Xs, Y, beta, l)
         if np.inner(gradient, gradient) < epsilon*epsilon:
             break

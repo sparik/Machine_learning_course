@@ -1,6 +1,9 @@
+"""
+this module contains the RandomForest class
+"""
+
 import numpy as np
 from decision_tree import DecisionTree
-import statistics
 
 class RandomForest(object):
     """
@@ -30,7 +33,7 @@ class RandomForest(object):
 
         N = len(X)
 
-        for num in range(self.num_trees):
+        for _ in range(self.num_trees):
             sz = int(N*self.ratio_per_tree)
             idx = np.random.choice(N, sz, replace=True)
             trainX = [X[i] for i in idx]
@@ -75,5 +78,4 @@ class RandomForest(object):
             conf.append(maxcnt / self.num_trees)
 
 
-        #print((Y, conf))
         return (Y, conf)
